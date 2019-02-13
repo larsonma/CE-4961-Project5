@@ -27,6 +27,7 @@ class LED:
             if self.timer is not None:
                 self.timer.cancel()
                 self.timer = None
+                self.off()
         else:
             if self.state == 'off':
                 self.state = 'on'
