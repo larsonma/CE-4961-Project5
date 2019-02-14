@@ -3,6 +3,7 @@
 import threading
 import identity
 import socket
+import time
 
 class StatusThread(threading.Thread):
     
@@ -13,29 +14,39 @@ class StatusThread(threading.Thread):
 
     def send_status(self):
         iden = identity.getIdentity()
-        message = 'operation: acknowledge\r\n{0}state: {1}'.format(iden, self.state)
+        message = 'operation: status\r\n{0}state: {1}'.format(iden, self.state)
 
         self.sock.send(bytes(message, 'ascii'))
 
+    def rec_ack(self):
+        try:
+            self.sock.settimeout(5)
+            ack = self.sock.recv(1024)
+            #verify ack
+            return True
+        except socket.timeout:
+            return False
+
     def run(self):
         failed_attempts = 0
+        send_immediate = False
 
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect(self.address)
+        self.sock.connect(self.address)
 
         while True:
-            time.sleep(60)
+            if not send_immediate:
+                time.sleep(60)
 
             self.send_status()
 
             #wait for ack
-            try:
-                self.sock.settimeout(5)
-                ack = sock.recv(1024)
-                #verify ack
-            except socket.timeout:
-                #resent status and exit terminate thread if it fails again
-                failed_attempts++
+            if not self.rec_ack():
+                failed_attempts += 1
+                send_immediate = True
+            else:
+                failed_attemps = 0
+                send_immediate = False
 
             if failed_attempts == 2:
                 self.sock.close()
