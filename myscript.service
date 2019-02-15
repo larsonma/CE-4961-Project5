@@ -1,0 +1,14 @@
+[Unit]
+Description=Project 5 Service
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/python3 -u server.py
+WorkingDirectory=/home/pi/CE4961/CE-4961-Project5
+StandardOutput=inherit
+StandardError=inherit
+Restart=always
+User=pi
+
+[Install]
+WantedBy=multi-user.target
